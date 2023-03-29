@@ -1,0 +1,13 @@
+diff --git a/walloc.c b/walloc.c
+index a107b3c..1ca19fe 100644
+--- a/walloc.c
++++ b/walloc.c
+@@ -182,6 +182,8 @@ allocate_pages(size_t payload_size, size_t *n_allocated) {
+     if (__builtin_wasm_memory_grow(0, grow >> PAGE_SIZE_LOG_2) == -1) {
+       return NULL;
+     }
++    void memory_grown();
++    memory_grown();
+     walloc_heap_size += grow;
+   }
+   
