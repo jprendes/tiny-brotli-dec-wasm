@@ -121,3 +121,10 @@ export default class BrotliDecompressStream {
         this.#wasm.BrotliDecoderDestroyInstance(this.#state);
     }
 };
+
+export const Result = {
+    get Error() { return 0; },
+    get Success() { return 1; },
+    get NeedsMoreInput() { return 2; },
+    get NeedsMoreOutput() { return 3; },
+};
