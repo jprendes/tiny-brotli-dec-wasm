@@ -1,6 +1,6 @@
 {
     "name": "tiny-brotli-dec-wasm",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "description": "A tiny Brotli streaming decoder.",
     "keywords": ["brotli", "compression"],
     "homepage": "https://github.com/jprendes/tiny-brotli-dec-wasm",
