@@ -1,6 +1,8 @@
 import BrotliDecompressStream from "../build/tiny-brotli-dec-wasm.mjs"
 import Deno from "./denoify.mjs"
 
+await BrotliDecompressStream.init(Deno.readFile);
+
 async function run_test(input, stdout = null) {
     const brotli = await BrotliDecompressStream.create();
     let offset = 0;

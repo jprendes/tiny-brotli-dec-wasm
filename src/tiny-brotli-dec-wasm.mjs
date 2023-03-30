@@ -13,52 +13,48 @@ export default class BrotliDecompressStream {
 
     static #module = null;
 
-    static async prepare() {
-        if (this.#module) return;
-
+    static #init_in_progress = null;
+    static async #init(readFile) {
         const url = new URL("./tiny-brotli-dec-wasm.wasm", import.meta.url);
-
-        if (globalThis.process) {
-            const fs = await import("fs/promises");
-            const bytes = await fs.readFile(url);
-            this.#module = new WebAssembly.Module(bytes);
+        const bytesSource = await readFile(url);
+        if (bytesSource instanceof Response) {
+            this.#module = await WebAssembly.compileStreaming(bytesSource);
         } else {
-            this.#module = await WebAssembly.compileStreaming(fetch(url));
+            this.#module = await WebAssembly.compile(bytesSource);
         }
+        this.#init_in_progress = null;
+    }
+
+    static async init(readFile = fetch) {
+        if (this.#module) return;
+        this.#init_in_progress = this.#init_in_progress || this.#init(readFile);
+        return this.#init_in_progress;
     }
 
     static create() {
         if (!this.#module) {
-            return this.prepare().then(() => this.create());
+            return this.init().then(() => this.create());
         }
         return new BrotliDecompressStream(this.#module);
     }
 
     constructor(module = null) {
-        if (!module) {
-            const url = new URL("./build/tiny-wasm-brotli-dec.wasm", import.meta.url);
-            const bytes = fs.readFileSync(url);
-            module = new WebAssembly.Module(bytes);
-        }
         const env = { memory_grown: this.#reattach_buffers.bind(this) };
         const instance = new WebAssembly.Instance(module, { env });
         this.#wasm = instance.exports;
         this.#reattach_buffers();
-        this.#init();
+        
+        this.#state = this.#wasm.BrotliDecoderCreateInstance(0, 0, 0);
+        this.#available_in_ptr = this.#wasm.malloc(4);
+        this.#available_out_ptr = this.#wasm.malloc(4);
+        this.#next_in_ptr_ptr = this.#wasm.malloc(4);
+        this.#next_out_ptr_ptr = this.#wasm.malloc(4);
     }
 
     #reattach_buffers() {
         const mem = this.#wasm.memory.buffer;
         this.#mem8 = new Uint8Array(mem);
         this.#mem32 = new Uint32Array(mem);
-    }
-
-    #init() {
-        this.#state = this.#wasm.BrotliDecoderCreateInstance(0, 0, 0);
-        this.#available_in_ptr = this.#wasm.malloc(4);
-        this.#available_out_ptr = this.#wasm.malloc(4);
-        this.#next_in_ptr_ptr = this.#wasm.malloc(4);
-        this.#next_out_ptr_ptr = this.#wasm.malloc(4);
     }
 
     #in_size = 0;
