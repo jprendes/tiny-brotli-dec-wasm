@@ -50,7 +50,7 @@ for await (let chunk of response.body) {
         } if (result === Result.Success) {
             // We are done!
             break;
-        } else if (resul === Result.Error) {
+        } else if (result === Result.Error) {
             // Something went wrong
             throw new Error("Error decompressing file");
         }
