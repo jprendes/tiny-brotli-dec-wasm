@@ -72,6 +72,16 @@ This library was inspired and borrows ideas from
 
 # Development
 
+## Using Docker
+
+The easiest way to build the project is using docker.
+Just run:
+```sh
+docker build --output=build .
+```
+
+Otherwise, follow the instructions below.
+
 ## Requirements
 
 To build this project you will need:
